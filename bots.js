@@ -10,51 +10,52 @@
 
 let bots = 0;
 const es = new EventSource('https://eu.ogar69.yuu.dev/gateway');
+
 es.addEventListener('servers', (data) => {
-	if (bots > 499) return;
-	bots++;
+    if (bots > 499) return;
+    bots++;
 
-	let playing = false;
+    let playing = false;
 
-	data = JSON.parse(data.data);
+    data = JSON.parse(data.data);
 
-	let server = {};
+    let server = {};
 
-	for (const i of data) {
-		if (i.name == 'Omega') server = i;
-	}
+    for (const i of data) {
+        if (i.name == 'Omega') server = i;
+    }
 
-	const ws = new WebSocket(`wss://eu.ogar69.yuu.dev:${server.endpoint}?`);
-	ws.binaryType = 'arraybuffer';
-	ws.onopen = () => {
-		//handshake
-		const writer = new BinaryWriter();
-		writer.writeUInt8(69);
-		writer.writeInt16(420);
-		writer.writeUTF16String('Bot'); // nick
-		writer.writeUTF16String(''); // skin1
-		writer.writeUTF16String(''); // skin2
-		ws.send(writer.finalize());
+    const ws = new WebSocket(`wss://eu.ogar69.yuu.dev:${server.endpoint}?`);
+    ws.binaryType = 'arraybuffer';
+    ws.onopen = () => {
+        //handshake
+        const writer = new BinaryWriter();
+        writer.writeUInt8(69);
+        writer.writeInt16(420);
+        writer.writeUTF16String('Bot'); // nick
+        writer.writeUTF16String(''); // skin1
+        writer.writeUTF16String(''); // skin2
+        ws.send(writer.finalize());
 
-		const s = new BinaryWriter();
-		s.writeUInt8(1);
-		s.writeUTF16String('Bot');
-		s.writeUTF16String('');
-		s.writeUTF16String('');
-		ws.send(s.finalize());
-	};
-	ws.onmessage = function (message) {
-		const reader = new BinaryReader(new DataView(message.data));
+        const s = new BinaryWriter();
+        s.writeUInt8(1);
+        s.writeUTF16String('Bot');
+        s.writeUTF16String('');
+        s.writeUTF16String('');
+        ws.send(s.finalize());
+    };
+    ws.onmessage = function(message) {
+        const reader = new BinaryReader(new DataView(message.data));
 
-		if (reader.readUInt8() == 4) {
+        if (reader.readUInt8() == 4) {
             const dv = new DataView(message.data, 1, 24);
             dv.getUint8(0); // pid
             const mycells = dv.getUint16(1, true);
 
-			if (mycells) {
-				playing = true;
+            if (mycells) {
+                playing = true;
 
-				const writer = new BinaryWriter();
+                const writer = new BinaryWriter();
                 writer.writeUInt8(3);
                 writer.writeFloat32(0);
                 writer.writeFloat32(0);
@@ -65,18 +66,17 @@ es.addEventListener('servers', (data) => {
                 writer.writeUInt8(0);
                 writer.writeUInt8(0);
                 ws.send(writer.finalize());
-			}
-			else if (playing) {
-				const s = new BinaryWriter();
-				s.writeUInt8(1);
-				s.writeUTF16String('Bot');
-				s.writeUTF16String('');
-				s.writeUTF16String('');
-				ws.send(s.finalize());
-				playing = false;
-			}
-		}
-	};
+            } else if (playing) {
+                const s = new BinaryWriter();
+                s.writeUInt8(1);
+                s.writeUTF16String('Bot');
+                s.writeUTF16String('');
+                s.writeUTF16String('');
+                ws.send(s.finalize());
+                playing = false;
+            }
+        }
+    };
 });
 
 
@@ -126,7 +126,7 @@ class BinaryWriter {
             this.writeUInt16(e.charCodeAt(t));
         this.writeUInt16(0);
     }
-    skip(e=0) {
+    skip(e = 0) {
         this.offset += e;
     }
     finalize() {
@@ -137,8 +137,8 @@ class BinaryWriter {
 class BinaryReader {
     constructor(e, t = true) {
         this.view = e,
-        this.offset = 0,
-        this.le = t
+            this.offset = 0,
+            this.le = t
     }
     get length() {
         return this.view.byteLength
@@ -155,39 +155,39 @@ class BinaryReader {
     readUInt16() {
         const e = this.view.getUint16(this.offset, this.le);
         return this.offset += 2,
-        e
+            e
     }
     readInt16() {
         const e = this.view.getUint16(this.offset, this.le);
         return this.offset += 2,
-        e
+            e
     }
     readUInt32() {
         const e = this.view.getUint32(this.offset, this.le);
         return this.offset += 4,
-        e
+            e
     }
     readInt32() {
         const e = this.view.getInt32(this.offset, this.le);
         return this.offset += 4,
-        e
+            e
     }
     readFloat32() {
         const e = this.view.getFloat32(this.offset, this.le);
         return this.offset += 4,
-        e
+            e
     }
     readFloat64() {
         const e = this.view.getFloat64(this.offset, this.le);
         return this.offset += 8,
-        e
+            e
     }
     skip(e) {
         this.offset += e
     }
     readUTF8String() {
         const e = [];
-        for (; this.offset < this.view.byteLength; ) {
+        for (; this.offset < this.view.byteLength;) {
             const t = this.readUInt8();
             if (!t)
                 break;
@@ -195,17 +195,17 @@ class BinaryReader {
         }
         return e.join("")
     }
-    readUTF16String(e=!1) {
+    readUTF16String(e = !1) {
         const t = [];
         if (e)
-            for (; this.offset < this.view.byteLength; ) {
+            for (; this.offset < this.view.byteLength;) {
                 const e = this.readUInt16();
                 if (!e)
                     break;
                 t.push(String.fromCharCode(255 & e))
             }
         else
-            for (; this.offset < this.view.byteLength; ) {
+            for (; this.offset < this.view.byteLength;) {
                 const e = this.readUInt16();
                 if (!e)
                     break;
@@ -213,9 +213,9 @@ class BinaryReader {
             }
         return t.join("")
     }
-    readBytes(e=0) {
+    readBytes(e = 0) {
         const t = this.view.buffer.slice(this.offset, this.offset + e);
         return this.offset += e,
-        t
+            t
     }
 }
