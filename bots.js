@@ -1,20 +1,30 @@
+// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  try to take over the world!
+// @author       You
+// @match        https://ogar69.yuu.dev/
+// @grant        none
+// ==/UserScript==
+
 let bots = 0;
-const es = new EventSource('http://eu.ogar69.yuu.dev/gateway');
+const es = new EventSource('https://eu.ogar69.yuu.dev/gateway');
 es.addEventListener('servers', (data) => {
-	if (bots > 49) return;
+	if (bots > 499) return;
 	bots++;
-	
+
 	let playing = false;
-	
+
 	data = JSON.parse(data.data);
-	
+
 	let server = {};
-	
+
 	for (const i of data) {
-		if (i.name == 'Mega') server = i;
+		if (i.name == 'Omega') server = i;
 	}
-	
-	const ws = new WebSocket(`ws://eu.ogar69.yuu.dev:${server.endpoint}?`);
+
+	const ws = new WebSocket(`wss://eu.ogar69.yuu.dev:${server.endpoint}?`);
 	ws.binaryType = 'arraybuffer';
 	ws.onopen = () => {
 		//handshake
@@ -25,7 +35,7 @@ es.addEventListener('servers', (data) => {
 		writer.writeUTF16String(''); // skin1
 		writer.writeUTF16String(''); // skin2
 		ws.send(writer.finalize());
-		
+
 		const s = new BinaryWriter();
 		s.writeUInt8(1);
 		s.writeUTF16String('Bot');
@@ -35,15 +45,15 @@ es.addEventListener('servers', (data) => {
 	};
 	ws.onmessage = function (message) {
 		const reader = new BinaryReader(new DataView(message.data));
-		
+
 		if (reader.readUInt8() == 4) {
             const dv = new DataView(message.data, 1, 24);
             dv.getUint8(0); // pid
             const mycells = dv.getUint16(1, true);
-			
+
 			if (mycells) {
 				playing = true;
-				
+
 				const writer = new BinaryWriter();
                 writer.writeUInt8(3);
                 writer.writeFloat32(0);
